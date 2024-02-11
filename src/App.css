@@ -1,0 +1,300 @@
+#root {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding-top: env(safe-area-inset-top, 8px);
+  padding-right: env(safe-area-inset-right, 12px);
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+  padding-left: env(safe-area-inset-left, 12px);
+  text-align: center;
+  box-sizing: border-box;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d3d3d399;
+
+  .dialog {
+    border-radius: 6px;
+    width: 75%;
+    max-width: 25em;
+    min-width: 15em;
+    max-height: 20em;
+    min-height: fit-content;
+    border: 1px solid gray;
+    overflow: hidden;
+    background: white;
+    display: flex;
+    gap: 1em;
+    flex-direction: column;
+    padding: 1em;
+    box-sizing: border-box;
+
+    h1 {
+      flex: 0 0;
+    }
+    > div {
+      flex: 1 1;
+    }
+    .actions {
+      flex: 0 0;
+      /* padding: 1em 0; */
+      button {
+        width: fit-content;
+        margin: 0 auto;
+        background: #123456;
+        color: white;
+      }
+    }
+  }
+
+  .playerList {
+    padding: 0 10%;
+  }
+
+  .player {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .avatar {
+      width: 1em;
+      height: 1em;
+      flex: 0 0 1em;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .displayName {
+      flex: 1 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status {
+      filter: grayscale(1);
+      opacity: 0.4;
+      flex: 0 0 1em;
+
+      &.ready {
+        filter: none;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.header {
+  flex: 0 1;
+}
+.gameArea {
+  flex: 1 1;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2em;
+  white-space: nowrap;
+}
+
+h2 {
+  margin: 0;
+}
+
+.targetPattern {
+  flex: 0 1 25%;
+  .player {
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+    height: 100%;
+    margin: 0 auto;
+  }
+  .playingGrid {
+    border-width: 6px;
+    border-radius: 5px;
+    border-color: black;
+  }
+}
+
+.playingAreaWrapper {
+  flex: 1 1 75%;
+  position: relative;
+}
+
+.playingArea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 2em;
+}
+
+.otherPlayersWrapper {
+  flex: 0 0 25%;
+  position: relative;
+  height: inherit;
+  width: inherit;
+}
+
+.otherPlayers {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  gap: 1em;
+  justify-content: space-evenly;
+  overflow: hidden;
+
+  .cardFooter {
+    height: 1.5em;
+  }
+}
+
+.thisPlayer {
+  flex: 1 1;
+  position: relative;
+  font-size: 1.25rem;
+
+  .playingGrid {
+    margin: auto;
+    .cell {
+      cursor: pointer;
+    }
+  }
+}
+
+.playingGrid {
+  max-height: calc(100% - 1.5em); /* 1.5em for the card footer */
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #888;
+  aspect-ratio: 1/1;
+  padding: 2.5%;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 5%;
+
+  > .cell {
+    background: gray;
+    border-radius: 2px;
+
+    &.colour0 {
+      background: red;
+    }
+
+    &.colour1 {
+      background: green;
+    }
+
+    &.colour2 {
+      background: blue;
+    }
+  }
+  
+  > .cell::before {
+    content: "";
+    padding-bottom: 100%;
+    display: block;
+  }
+}
+
+.cardFooter {
+  height: 1.5em;
+  font-size: 0.75em;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+
+  .playerName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media screen and (orientation:portrait) {
+  h1 {
+    font-size: 8vw;
+  }
+  .targetPattern {
+    margin: 0.5em 0 1em 0;
+  }
+  .playingArea {
+    flex-direction: column;
+    gap: 1em;
+  }
+  .thisPlayer {
+    flex: 0 0 75%;
+    max-height: 75%;
+    width: 100%;
+  }
+  .otherPlayersWrapper {
+    max-height: calc(25% - 1em);
+  }
+  .otherPlayers {
+    flex-direction: row;
+    .player {
+      max-width: 25%;
+      flex: 0 0 25%;
+      position: relative;
+    }
+  }
+}
+
+
+@media screen and (orientation:landscape) {
+  h1 {
+    font-size: 8vh;
+  }
+
+  .playingArea {
+    flex-direction: row;
+    gap: 2em;
+  }
+
+  .otherPlayers {
+    flex-direction: column;
+    .player {
+      height: calc(33% - 1.5em);
+    }
+  }
+}
+
+.spectator {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+
+  .player {
+    flex: 1 1 50%;
+    width: 50%;
+  }
+}
