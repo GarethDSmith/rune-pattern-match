@@ -5,8 +5,6 @@ const ALL_READY_START_MILLIS = 3_000;
 const ROUND_START_MILLIS = 5_000;
 
 type GameActions = {
-  startGame: () => void;
-  increment: (params: { amount: number }) => void;
   interactWithCell: (params: { cellNum: number }) => void;
   playerReady: () => void;
 }
@@ -18,10 +16,6 @@ declare global {
 const colours = 3;
 const gridSize = 9;
 const winningScore = 5;
-
-export function getCount(game: GameState) {
-  return game.totalMoves;
-}
 
 function getColour(): number {
   return Math.floor(Math.min(Math.random() * colours, colours - 1));
@@ -55,29 +49,25 @@ function patternsMatch(patternA: number[], patternB: number[]): boolean {
 function roundReset(game: GameState, allPlayerIds: string[]): void {
   for (const playerId of allPlayerIds) {
     game.playerPatterns[playerId] = initialisePlayerPattern();
-    game.playerMoves[playerId] = 0;
   }
-  game.totalMoves = 0;
   game.targetPattern = generatePattern();
   game.roundOver = false;
 }
 
 export interface GameState {
   roundStartMillis: number,
-  gameStarted: boolean;
-  totalMoves: number,
-  playerMoves: Record<string, number>,
+  gameStarted: boolean,
   targetPattern: number[],
   // PlayerId -> wins
   scores: Record<string, number>,
   // PlayerId -> current grid
   playerPatterns: Record<string, number[]>,
   playerReady: Record<string, boolean>,
-  roundOver: boolean;
-  roundEndTime: number | undefined;
-  roundWinner: string | undefined;
+  roundOver: boolean,
+  roundEndTime: number | undefined,
+  roundWinner: string | undefined,
   roundDuration: number,
-  nextRoundStartSeconds: number;
+  nextRoundStartSeconds: number,
 }
 
 Rune.initLogic({
@@ -93,11 +83,9 @@ Rune.initLogic({
     return {
       roundStartMillis: Rune.gameTime() + FORCE_START_MILLIS,
       gameStarted: false,
-      totalMoves: 0,
       targetPattern: generatePattern(),
       scores,
       playerPatterns,
-      playerMoves: {},
       playerReady: {},
       roundOver: false,
       roundEndTime: 0,
@@ -107,24 +95,21 @@ Rune.initLogic({
     }
   },
   actions: {
-    startGame: (state, { game }) => {
-      game.gameStarted = true;
-    },
-    increment: ({ amount }, { game }) => {
-      game.totalMoves += amount
-    },
     interactWithCell: ({ cellNum }, { game, playerId }) => {
+      if (!playerId || !game.gameStarted || game.roundOver) {
+        // Spectators can't interact and no-one can interact before the game's started or once the round's over
+        throw Rune.invalidAction();
+      }
       const playerPattern: number[] = game.playerPatterns[playerId];
       if (!playerPattern) {
-        return;
+        // If the player has no pattern then there's not a lot to be done. We shouldn't be able to get here
+        throw Rune.invalidAction();
       }
       let newValue: number = (playerPattern[cellNum] ?? 0) + 1;
       if (newValue >= colours) {
         newValue = 0;
       }
       playerPattern[cellNum] = newValue;
-      ++game.totalMoves;
-      game.playerMoves[playerId] = (game.playerMoves[playerId] ?? 0) + 1;
       if (patternsMatch(playerPattern, game.targetPattern)) {
         game.scores[playerId] = (game.scores[playerId] ?? 0) + 1;
         // display a result, then reset
@@ -158,15 +143,21 @@ Rune.initLogic({
   },
   events: {
     playerJoined: (playerId, { game }) => {
-      game.scores[playerId] = 0;
-      game.playerPatterns[playerId] = initialisePlayerPattern();
-      game.playerMoves[playerId] = 0;
+      if (game.scores[playerId] === undefined) {
+        game.scores[playerId] = 0;
+      }
+      if (game.playerPatterns[playerId] === undefined) {
+        game.playerPatterns[playerId] = initialisePlayerPattern();
+      }
     },
     playerLeft: (playerId, { game }) => {
       delete game.scores[playerId];
       delete game.playerPatterns[playerId];
-      delete game.playerMoves[playerId];
+      delete game.playerReady[playerId];
     },
+    // stateSync: () => {
+
+    // },
   },
   update: ({ game, allPlayerIds }) => {
     const now = Rune.gameTime();
